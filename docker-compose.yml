@@ -1,3 +1,4 @@
+
 name: CI
 on:
   push:
@@ -5,7 +6,6 @@ on:
 
 jobs:
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
     
     steps:
@@ -14,11 +14,11 @@ jobs:
       #Skonfigurowanie dockera + buildx
       - name: Buildx set-up
         id: buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2.2.1
         
       #Instalacja QEMU
       - name: Docker Setup QEMU
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-qemu-action@v2.1.0
 
       #Konfiguracja cachowania
       - name: Cache Docker layers
@@ -28,10 +28,9 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
-
       #Logowanie do Dockerhuba
       - name: Login to DockerHub
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v2.1.0
         with:
           username: ${{secrets.DOCKER_HUB_USERNAME}}
           password: ${{secrets.DOCKER_HUB_ACCESS_TOKEN}}
@@ -44,11 +43,10 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
           platforms: linux/arm/v7,linux/arm64/v8,linux/amd64 
-          context: ./
-          file: ./dockerfile.v1
+          context: .
+          file: Dockerfile
           push: true
-          tags: |
-            panadam15/lab:ghfront1
+          tags: ${{secrets.DOCKER_HUB_USERNAME}}/lab7:latest
       
       #Przenies cache'a
       - name: Move cache
